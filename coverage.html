@@ -258,6 +258,31 @@
     body.dark-theme .mob-tool-btn { background: #16213e; border-color: var(--border); }
     .mob-tool-btn:hover { border-color: var(--accent); }
 
+/* Кнопка магазинов — активное состояние */
+.mob-filter-btn.stores-active {
+  border-color: #e8a020;
+  color: #e8a020;
+  background: rgba(232,160,32,0.1);
+}
+.sb-stores-btn {
+  margin: 8px 12px;
+  width: calc(100% - 24px);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: #f8f9fa;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sb-stores-btn:hover { border-color: #e8a020; background: rgba(232,160,32,0.06); }
+.sb-stores-btn.active { border-color: #e8a020; color: #e8a020; background: rgba(232,160,32,0.1); }
+body.dark-theme .sb-stores-btn { background: #0f3460; border-color: var(--border); color: var(--text); }
+
     /* Дропдаун для мобильных фильтров */
     .mob-dropdown {
       position: fixed;
@@ -350,6 +375,7 @@
 <div class="mob-bar" id="mob-bar">
   <button class="mob-filter-btn" id="mob-btn-day" onclick="toggleMobDropdown('day')">📅 День</button>
   <button class="mob-filter-btn" id="mob-btn-rep" onclick="toggleMobDropdown('rep')">👤 ТП</button>
+  <button class="mob-filter-btn" id="mob-btn-stores" onclick="toggleStores()">🏪 Магазины</button>
   <button class="mob-tool-btn" onclick="toggleTheme()" title="Сменить тему">🌓</button>
   <button class="mob-tool-btn" onclick="printMap()" title="Печать">🖨</button>
 </div>
@@ -374,6 +400,11 @@
         <button class="btn-tool" onclick="printMap()">🖨 Распечатать</button>
       </div>
     </div>
+
+    <div class="sb-section">Слои на карте</div>
+    <button class="sb-stores-btn" id="sb-stores-btn" onclick="toggleStores()">
+      🏪 <span id="sb-stores-label">Показать продуктовые магазины</span>
+    </button>
 
     <div class="sb-section">Фильтр по дням</div>
     <div class="day-filter" id="day-filter"></div>
@@ -1221,6 +1252,131 @@ function adjustMapForMobBar() {
   }
 }
 window.addEventListener('resize', adjustMapForMobBar);
+
+// ════════════════════════════════════════
+// ПРОДУКТОВЫЕ МАГАЗИНЫ
+// ════════════════════════════════════════
+let storesActive  = false;
+let storesLayer   = null;
+let storesLoading = false;
+
+async function toggleStores() {
+  if (storesLoading) return;
+
+  if (storesActive) {
+if (storesLayer) { myMap.geoObjects.remove(storesLayer); storesLayer = null; }
+    storesActive = false;
+    myMap.events.remove('boundschange', onBoundsChangeStores);
+    clearTimeout(_storesDebounceTimer);
+    updateStoresBtn();
+    return;
+  }
+
+  storesLoading = true;
+  updateStoresBtn(true);
+  notify('Ищу продуктовые магазины...');
+
+  try {
+    const isMobile = window.innerWidth <= 640;
+    const center   = myMap.getCenter();
+    const zoom     = myMap.getZoom();
+    const queries  = ['продуктовый магазин', 'супермаркет', 'гастроном', 'минимаркет'];
+
+    let searchOptions;
+
+    if (isMobile || zoom < 13) {
+      // На мобиле или маленьком зуме — ищем по тексту с городом без strictBounds
+      // Берём координаты центра и строим маленький bbox ~2км вокруг него
+      const delta = 0.018; // ~2км в градусах
+      const bbox  = [
+        [center[0] - delta, center[1] - delta],
+        [center[0] + delta, center[1] + delta]
+      ];
+      searchOptions = { boundedBy: bbox, strictBounds: false, results: 50, kind: 'biz' };
+    } else {
+      // На десктопе с нормальным зумом — используем видимую область
+      searchOptions = { boundedBy: myMap.getBounds(), strictBounds: true, results: 50, kind: 'biz' };
+    }
+
+    const results = await Promise.allSettled(
+      queries.map(q => ymaps.search(q, searchOptions))
+    );
+
+    const collection = new ymaps.GeoObjectCollection({}, {});
+    const seen = new Set();
+
+    results.forEach(res => {
+      if (res.status !== 'fulfilled') return;
+      res.value.geoObjects.each(obj => {
+        const coords = obj.geometry.getCoordinates();
+        const key = coords.join(',');
+        if (seen.has(key)) return;
+        seen.add(key);
+        const name = obj.properties.get('name') || 'Магазин';
+        const addr = obj.properties.get('description') || '';
+        collection.add(new ymaps.Placemark(coords, {
+          balloonContentHeader: '🏪 ' + name,
+          balloonContentBody: addr,
+          hintContent: name,
+        }, {
+          preset: 'islands#orangeShoppingIcon',
+          zIndex: 10,
+        }));
+      });
+    });
+
+if (collection.getLength() === 0) {
+      notify('Магазины не найдены в этом районе. Переместите карту и попробуйте снова.', 'error');
+      storesLoading = false; updateStoresBtn(); return;
+    }
+
+    storesLayer = collection;
+    storesActive = true;
+    myMap.geoObjects.add(storesLayer);
+    notify('🏪 Найдено ' + collection.getLength() + ' магазинов');
+
+    // При изменении области — автообновление если магазины активны
+    myMap.events.add('boundschange', onBoundsChangeStores);
+
+  } catch(e) {
+    notify('Ошибка: ' + e.message, 'error');
+  } finally {
+    storesLoading = false;
+    updateStoresBtn();
+  }
+}
+
+let _storesDebounceTimer = null;
+
+function onBoundsChangeStores() {
+  if (!storesActive) {
+    myMap.events.remove('boundschange', onBoundsChangeStores);
+    return;
+  }
+  // Дебаунс — ждём 800мс после последнего зума/перемещения
+  clearTimeout(_storesDebounceTimer);
+  _storesDebounceTimer = setTimeout(async () => {
+    if (!storesActive) return;
+    if (storesLayer) { myMap.geoObjects.remove(storesLayer); storesLayer = null; }
+    storesActive = false;
+    await toggleStores(); // перезапускаем поиск
+  }, 800);
+}
+
+function updateStoresBtn(loading = false) {
+  const mobBtn  = document.getElementById('mob-btn-stores');
+  const sbBtn   = document.getElementById('sb-stores-btn');
+  const sbLabel = document.getElementById('sb-stores-label');
+
+  if (mobBtn) {
+    mobBtn.textContent = loading ? '⏳ Ищу...' : storesActive ? '🏪 Скрыть' : '🏪 Магазины';
+    mobBtn.classList.toggle('stores-active', storesActive && !loading);
+  }
+  if (sbBtn && sbLabel) {
+    sbLabel.textContent = loading ? 'Поиск магазинов...' : storesActive ? 'Скрыть магазины' : 'Показать продуктовые магазины';
+    sbBtn.classList.toggle('active', storesActive && !loading);
+  }
+}
 
 // ════════════════════════════════════════
 function polygonCenter(coords) {
