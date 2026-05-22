@@ -817,7 +817,6 @@ function renderCsCard(cs) {
 
       <div class="cs-actions">
         ${st !== 'paid' ? `<button class="btn btn-green btn-sm" onclick="openPayment('${cs.id}','${cs.store_name}',${rest})">+ Платёж</button>` : ''}
-        <button class="btn btn-danger btn-sm" onclick="confirmDeleteCs('${cs.id}','${cs.store_name}')">Удалить</button>
       </div>
     </div>
   </div>`;
@@ -944,20 +943,6 @@ async function savePayment() {
 // ════════════════════════════════════════
 // УДАЛЕНИЕ
 // ════════════════════════════════════════
-function confirmDeleteCs(id, name) {
-  document.getElementById('confirm-msg').textContent = `Удалить консигнацию «${name}»?`;
-  document.getElementById('confirm-sub').textContent = 'Все платежи по ней тоже удалятся.';
-  document.getElementById('btn-confirm-ok').onclick = async () => {
-    try {
-      await API(`consignments?id=eq.${id}`, { method: 'DELETE' });
-      toast('Консигнация удалена','s');
-      closeM('m-confirm');
-      await loadMyData();
-    } catch(e) { toast('Ошибка','e'); }
-  };
-  openM('m-confirm');
-}
-
 function confirmDeletePay(payId, csId) {
   document.getElementById('confirm-msg').textContent = 'Удалить этот платёж?';
   document.getElementById('confirm-sub').textContent = 'Остаток долга увеличится.';

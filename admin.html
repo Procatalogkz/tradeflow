@@ -130,7 +130,8 @@ tbody tr:hover td{background:rgba(255,255,255,.015)}
 /* UPLOAD */
 .upload-zone{border:2px dashed var(--border2);border-radius:var(--r2);padding:30px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3);position:relative;overflow:hidden}
 .upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:rgba(232,197,71,.04)}
-.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+/* Убираем абсолютный инпут — он ломал выбор файла через проводник Windows */
+.upload-zone input[type=file]{display:none}
 .upload-ico{font-size:30px;margin-bottom:10px}
 .upload-text{font-size:13px;color:var(--muted)}
 .upload-text strong{color:var(--text)}
@@ -228,7 +229,17 @@ pre.code{background:var(--bg3);border:1px solid var(--border);border-radius:var(
 }
 .cp-card-price-wrap input:focus { border-color: var(--accent); }
 
-@media(max-width:960px){
+/* CP TABS */
+.cp-tab{padding:8px 18px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);font-family:var(--fb);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:-1px}
+.cp-tab:hover{color:var(--text)}
+.cp-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* MULTI PROD ROWS */
+.mprod-row{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:14px 14px 14px 36px;margin-bottom:10px;position:relative}
+.mprod-row-num{position:absolute;top:14px;left:12px;font-size:10px;font-weight:700;color:var(--muted);font-family:var(--fh)}
+.mprod-row-del{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--muted2);cursor:pointer;font-size:16px;transition:color .15s;line-height:1}
+.mprod-row-del:hover{color:var(--danger)}
+@media(max-width:960px) and (min-width:769px){
   :root{--sidebar:60px}
   .sb-logo small,.sb-item span:not(.ico),.sb-section,.sb-uname,.sb-urole,.sb-logo br+*,.bc{display:none}
   .sb-logo{font-size:10px;padding:16px 0;text-align:center}
@@ -239,229 +250,173 @@ pre.code{background:var(--bg3);border:1px solid var(--border);border-radius:var(
 @media(max-width:640px){
   .frow,.frow3{grid-template-columns:1fr}
   .stats-row{grid-template-columns:1fr 1fr}
-  .page-wrap{padding:16px}
-  .topbar{padding:0 16px}
+  .page-wrap{padding:12px}
+  .topbar{padding:0 12px}
+  .toolbar{flex-direction:column;align-items:stretch}
+  .toolbar .search-wrap,.toolbar select{width:100%}
+  .btn{white-space:normal}
+  /* Скрываем виджеты дашборда на мобильных */
+  #page-dash > div:not(.stats-row){display:none!important}
 }
 
-/* 📱 МОБИЛЬНАЯ ВЕРСИЯ (Modern Mobile UI) */
+/* ══════════════════════════════════════════
+   📱 МОБИЛЬНАЯ ВЕРСИЯ
+   ══════════════════════════════════════════ */
 @media (max-width: 768px) {
-  :root {
-    --sidebar: 0px;
+  :root { --sidebar: 0px; }
+
+  /* Скрываем сайдбар полностью */
+  .sidebar { display: none !important; }
+  .main { margin-left: 0 !important; }
+
+  /* Топбар на мобиле */
+  .topbar { padding: 0 14px !important; height: 54px !important; }
+  .topbar-title { font-size: 14px !important; }
+
+  /* Кнопка назад в топбар (показывается когда не на главном экране) */
+  .mob-back-btn {
+    display: none;
+    align-items: center; gap: 6px;
+    background: none; border: none; cursor: pointer;
+    color: var(--accent); font-size: 13px; font-weight: 600;
+    padding: 6px 0; margin-right: 10px;
   }
-  /* Логотип в верхнем бар - перемещаем туда */
-  .sb-logo {
-    display: none !important;
+  .mob-back-btn.visible { display: flex; }
+
+  /* Скрываем обычный контент страниц пока не выбрана */
+  .page-wrap { padding: 14px !important; }
+
+  /* ── МОБИЛЬНОЕ МЕНЮ-КВАДРАТИКИ ── */
+  #mob-menu {
+    display: none;
+    padding: 16px 14px;
   }
-  .sb-logo small {
-    display: none !important;
+  #mob-menu.visible { display: block; }
+
+  .mob-menu-title {
+    font-size: 10px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .08em;
+    margin-bottom: 14px; padding-left: 2px;
   }
-  .sb-section {
-    display: none !important;
+
+  .mob-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
   }
-  .sb-user, .sb-item span:not(.ico) {
-    display: none !important;
+
+  .mob-tile {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 8px; padding: 16px 8px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 16px; cursor: pointer;
+    transition: all .15s; min-height: 90px;
+    position: relative;
+    text-decoration: none; color: inherit;
   }
-  /* Выход показываем в мобильном виде */
-  .sb-footer {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: center !important;
-    align-items: center !important;
-    padding: 8px 10px 5px !important;
-    border-top: 1px solid var(--border) !important;
-    flex: 0 !important;
-    width: 100% !important;
+  .mob-tile:active { transform: scale(.95); background: var(--bg3); }
+  .mob-tile.accent { border-color: rgba(232,197,71,.3); background: rgba(232,197,71,.06); }
+
+  .mob-tile-ico {
+    font-size: 28px; width: 52px; height: 52px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg3); border-radius: 14px;
   }
-  .sb-footer .btn {
-    display: flex !important;
-    font-size: 13px !important;
-    padding: 8px 12px !important;
-    width: 100% !important;
-    justify-content: center !important;
+  .mob-tile.accent .mob-tile-ico { background: rgba(232,197,71,.15); }
+
+  .mob-tile-label {
+    font-size: 10px; font-weight: 600; color: var(--text);
+    text-align: center; line-height: 1.3;
   }
-  /* Нижняя навигация (Tab Bar) */
-  .sidebar {
-    width: 100% !important;
-    height: 85px !important;
-    top: auto !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    flex-direction: column !important;
-    border-right: none !important;
-    border-top: 1px solid var(--border);
-    padding: 0 !important;
-    background: rgba(19, 19, 19, 0.95);
-    backdrop-filter: blur(10px);
+
+  .mob-tile-badge {
+    position: absolute; top: 8px; right: 8px;
+    background: var(--accent); color: #000;
+    font-size: 9px; font-weight: 700;
+    padding: 2px 6px; border-radius: 10px;
+    min-width: 18px; text-align: center;
   }
-  .sb-nav {
-    flex-direction: row !important;
-    justify-content: space-around !important;
-    align-items: center !important;
-    width: 100% !important;
-    padding: 8px 10px !important;
-    overflow: hidden !important;
-    flex: 1 !important;
+
+  /* Когда страница активна — скрываем меню и показываем контент */
+  #mob-menu.hidden { display: none !important; }
+
+  /* Страницы на мобиле */
+  #page-dash,
+  #page-cats,
+  #page-brands,
+  #page-products,
+  #page-catalogs,
+  #page-settings {
+    display: none;
   }
-  .sb-item {
-    flex-direction: column !important;
-    gap: 5px !important;
-    padding: 10px !important;
-    border-radius: 12px !important;
-    flex: 1 !important;
-    justify-content: center !important;
-  }
-  .sb-item .ico {
-    font-size: 22px !important;
-    margin: 0 !important;
-  }
-  /* Бейджи над иконками */
-  .sb-item .bc {
-    position: absolute;
-    top: 5px;
-    right: 15%;
-    display: block !important;
-    font-size: 8px !important;
-    padding: 1px 4px !important;
-  }
-  /* Основной контент */
-  .main {
-    margin-left: 0 !important;
-    padding-bottom: 80px;
-  }
-  /* Верхний бар */
-  .topbar {
-    padding: 0 15px !important;
-    height: 60px !important;
-  }
-  .topbar-title {
-    font-weight: 600 !important;
-    font-size: 16px !important;
-  }
-  .page-wrap {
-    padding: 15px !important;
-  }
-  /* Превращаем таблицы в карточки */
-  table, thead, tbody, th, td, tr {
+  #page-dash.mob-active,
+  #page-cats.mob-active,
+  #page-brands.mob-active,
+  #page-products.mob-active,
+  #page-catalogs.mob-active,
+  #page-settings.mob-active {
     display: block !important;
   }
-  thead {
-    display: none !important;
-  }
-  .tbl-wrap {
-    background: transparent !important;
-    border: none !important;
-  }
+
+  /* Таблицы → карточки */
+  table, thead, tbody, th, td, tr { display: block !important; }
+  thead { display: none !important; }
+  .tbl-wrap { background: transparent !important; border: none !important; }
   tbody tr {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--r2);
-    margin-bottom: 16px;
-    padding: 16px;
-    display: flex !important;
-    flex-direction: column;
-    gap: 12px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--r2); margin-bottom: 12px;
+    padding: 14px; display: flex !important;
+    flex-direction: column; gap: 8px;
   }
-  /* Увеличиваем фото и центрируем его */
-  td:has(.thumb) {
-    display: flex !important;
-    justify-content: center !important;
-    width: 100% !important;
-    padding: 0 0 10px 0 !important;
-    border-bottom: 1px solid var(--border) !important;
-  }
-  .thumb {
-    width: 120px !important;
-    height: 120px !important;
-    border-radius: 12px !important;
-  }
-  .thumb img {
-    width: 100%;
-    height: 100%;
-  }
-  /* Название категории/товара/бренда — делаем акцентным */
-  td:has(strong) {
-    font-size: 16px !important;
-    color: var(--text) !important;
-    padding: 8px 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    text-align: left !important;
-    font-weight: 600 !important;
-    width: 100% !important;
-  }
-  td:has(strong) strong {
-    flex: 1 !important;
-  }
-  /* Для категорий — явный стиль */
-  #cats-body td strong {
-    font-size: 16px !important;
-    font-weight: 600 !important;
-    color: var(--text) !important;
-  }
-  /* Остальные данные выравниваем в ряд "ключ-значение" */
   td {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 4px 0 !important;
+    display: flex !important; justify-content: space-between !important;
+    align-items: center !important; padding: 4px 0 !important;
     font-size: 13px !important;
-    border-bottom: 1px dotted var(--border2) !important;
+    border-bottom: 1px dotted var(--border) !important;
   }
-  /* Убираем лишние элементы, которые не несут смысла в строке */
-  /* Скрываем только позицию для товаров (4-я колонка в products) */
-  #prods-body td:has(.pos) {
-    display: none !important;
-  }
-  /* Для категорий и брендов показываем название */
-  #cats-body td:nth-child(2), #brands-body td:nth-child(1) {
-    display: block !important;
-    width: 100% !important;
-    padding: 8px 0 !important;
+  td:last-child { border-bottom: none !important; }
+  td:has(.thumb) {
+    justify-content: center !important; padding: 0 0 8px 0 !important;
     border-bottom: 1px solid var(--border) !important;
-    font-size: 16px !important;
-    font-weight: 600 !important;
-    color: var(--text) !important;
   }
-  #cats-body td:nth-child(2) strong, #brands-body td:nth-child(1) strong {
-    font-size: 16px !important;
-    font-weight: 600 !important;
-    color: var(--text) !important;
-  }
-  /* Блок действий в самом низу */
+  .thumb { width: 80px !important; height: 80px !important; border-radius: 10px !important; }
+  .thumb img { width: 100%; height: 100%; }
   .td-act {
-    margin-top: 10px;
-    padding-top: 15px !important;
-    border-top: 1px solid var(--border) !important;
+    flex-wrap: wrap; gap: 8px; justify-content: flex-start !important;
+    padding-top: 8px !important; border-top: 1px solid var(--border) !important;
     border-bottom: none !important;
-    display: flex !important;
-    gap: 10px !important;
   }
-  .td-act .btn {
-    flex: 1;
-    justify-content: center;
-    padding: 10px !important;
-  }
-  /* Кнопки и формы */
-  .stats-row {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 10px !important;
-  }
-  .stat {
-    padding: 12px !important;
-  }
-  .stat-val {
-    font-size: 20px !important;
-  }
-  .frow, .frow3 {
-    grid-template-columns: 1fr !important;
-  }
-  /* Модальные окна */
+  .td-act .btn { flex: 1; justify-content: center; padding: 9px !important; font-size: 12px !important; }
+
+  /* Статистика */
+  .stats-row { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .stat { padding: 12px !important; }
+  .stat-val { font-size: 20px !important; }
+
+  /* Формы */
+  .frow, .frow3 { grid-template-columns: 1fr !important; }
+  .panel-head { padding: 14px !important; flex-wrap: wrap; gap: 8px; }
+  .panel-head .btn { font-size: 12px !important; }
+
+  /* Модалки — fullscreen */
   .modal {
-    width: 100% !important;
-    height: 100% !important;
-    max-height: 100vh !important;
-    border-radius: 0 !important;
+    width: 100% !important; max-width: 100% !important;
+    max-height: 100vh !important; height: 100% !important;
+    border-radius: 0 !important; margin: 0 !important;
   }
+  .modal-head, .modal-body { padding-left: 16px !important; padding-right: 16px !important; }
+  .modal-footer { padding: 14px 16px !important; flex-direction: column !important; }
+  .modal-footer .btn { width: 100% !important; justify-content: center; }
+
+  /* Тулбар */
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .toolbar .search-wrap, .toolbar select { width: 100% !important; }
+  .toolbar-right { margin-left: 0; }
+
+  /* Категорийный аккордеон */
+  .folder-btn { font-size: 12px !important; padding: 12px !important; }
+  #cats-accordion { margin: 0; }
 }
 </style>
 </head>
@@ -519,6 +474,7 @@ const API = (endpoint, options = {}) => {
       <div class="sb-item"        id="nav-products" onclick="go('products')"> <span class="ico">📦</span><span>Товары</span>     <span class="bc" id="cnt-prods">0</span></div>
       <div class="sb-item"        id="nav-catalogs" onclick="go('catalogs')"> <span class="ico">🔗</span><span>Каталоги</span>   <span class="bc" id="cnt-catalogs">0</span></div>
       <div class="sb-section">Инструменты</div>
+      <div class="sb-item" onclick="window.location.href='supervisor.html'"><span class="ico">📋</span><span>Консигнации</span></div>
       <div class="sb-item" onclick="window.open('coverage.html','_blank')">   <span class="ico">🗺️</span><span>Sales Coverage Map</span></div>
     </nav>
     <div class="sb-footer">
@@ -536,13 +492,61 @@ const API = (endpoint, options = {}) => {
   <!-- ═══ MAIN ═══ -->
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title" id="topbar-title" style="cursor:pointer" onclick="window.location.href='index.html'">ProCatalogKz</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="mob-back-btn" id="mob-back-btn" onclick="mobGoHome()">← Назад</button>
+        <button class="topbar-back-btn" id="topbar-back" onclick="go('dash')">←</button>
+        <div class="topbar-title" id="topbar-title" style="cursor:pointer" onclick="location.reload()">↻</div>
+      </div>
       <div id="topbar-actions"></div>
+    </div>
+
+    <!-- МОБИЛЬНОЕ МЕНЮ КВАДРАТИКАМИ (только на мобиле) -->
+    <div id="mob-menu" class="visible">
+      <div class="mob-menu-title">Управление каталогом</div>
+      <div class="mob-grid">
+        <div class="mob-tile accent" onclick="mobGo('dash')">
+          <div class="mob-tile-ico">📊</div>
+          <div class="mob-tile-label">Дашборд</div>
+        </div>
+        <div class="mob-tile" onclick="mobGo('cats')">
+          <div class="mob-tile-ico">📂</div>
+          <div class="mob-tile-label">Категории</div>
+          <span class="mob-tile-badge" id="mob-cnt-cats">0</span>
+        </div>
+        <div class="mob-tile" onclick="mobGo('brands')">
+          <div class="mob-tile-ico">🏷️</div>
+          <div class="mob-tile-label">Бренды / ТМ</div>
+          <span class="mob-tile-badge" id="mob-cnt-brands">0</span>
+        </div>
+        <div class="mob-tile" onclick="mobGo('products')">
+          <div class="mob-tile-ico">📦</div>
+          <div class="mob-tile-label">Товары</div>
+          <span class="mob-tile-badge" id="mob-cnt-prods">0</span>
+        </div>
+        <div class="mob-tile" onclick="mobGo('catalogs')">
+          <div class="mob-tile-ico">🔗</div>
+          <div class="mob-tile-label">Каталоги</div>
+          <span class="mob-tile-badge" id="mob-cnt-catalogs">0</span>
+        </div>
+        <div class="mob-tile" onclick="mobGo('settings')">
+          <div class="mob-tile-ico">⚙️</div>
+          <div class="mob-tile-label">Настройки</div>
+        </div>
+        <div class="mob-tile" onclick="window.location.href='supervisor.html'">
+          <div class="mob-tile-ico">📋</div>
+          <div class="mob-tile-label">Консигнации</div>
+        </div>
+        <div class="mob-tile" onclick="window.open('coverage.html','_blank')">
+          <div class="mob-tile-ico">🗺️</div>
+          <div class="mob-tile-label">Coverage Map</div>
+        </div>
+      </div>
     </div>
     <div class="page-wrap">
 
       <!-- ── DASHBOARD ── -->
       <div id="page-dash">
+        <!-- Десктопная статистика -->
         <div class="stats-row">
           <div class="stat"><div class="stat-label">Категорий</div><div class="stat-val ca" id="st-cats">4</div><div class="stat-sub">активных</div></div>
           <div class="stat"><div class="stat-label">Брендов / ТМ</div><div class="stat-val ca" id="st-brands">4</div><div class="stat-sub">в справочнике</div></div>
@@ -557,6 +561,44 @@ const API = (endpoint, options = {}) => {
           <div class="panel">
             <div class="panel-head"><div class="panel-title">Последние товары</div><button class="btn btn-sm btn-primary" onclick="go('products');setTimeout(openProdModal,50)">+ Добавить</button></div>
             <div class="panel-body" id="dash-prods"></div>
+          </div>
+        </div>
+        
+        <!-- Мобильный рабочий стол -->
+        <div class="mobile-desktop-view" style="display:none">
+          <div class="app-grid">
+            <div class="app-icon active" onclick="go('dash')">
+              <div class="app-ico">📊</div>
+              <div class="app-label">Дашборд</div>
+            </div>
+            <div class="app-icon" onclick="go('cats')">
+              <div class="app-ico">📂</div>
+              <div class="app-label">Категории</div>
+            </div>
+            <div class="app-icon" onclick="go('brands')">
+              <div class="app-ico">🏷️</div>
+              <div class="app-label">Бренды</div>
+            </div>
+            <div class="app-icon" onclick="go('products')">
+              <div class="app-ico">📦</div>
+              <div class="app-label">Товары</div>
+            </div>
+            <div class="app-icon" onclick="go('catalogs')">
+              <div class="app-ico">🔗</div>
+              <div class="app-label">Каталоги</div>
+            </div>
+            <div class="app-icon" onclick="window.location.href='supervisor.html'">
+              <div class="app-ico">📋</div>
+              <div class="app-label">Консигнации</div>
+            </div>
+            <div class="app-icon" onclick="window.open('coverage.html','_blank')">
+              <div class="app-ico">🗺️</div>
+              <div class="app-label">Coverage</div>
+            </div>
+            <div class="app-icon" onclick="window.location.href='index.html'">
+              <div class="app-ico">🏠</div>
+              <div class="app-label">Главная</div>
+            </div>
           </div>
         </div>
       </div>
@@ -678,36 +720,43 @@ const API = (endpoint, options = {}) => {
 <div class="overlay" id="m-catalog-prod">
   <div class="modal" style="max-width:960px;width:96vw;height:90vh;display:flex;flex-direction:column">
     <div class="modal-head" style="flex-shrink:0">
-      <div class="modal-title">Добавить товары в каталог</div>
+      <div class="modal-title">Добавить в каталог</div>
       <button class="modal-x" onclick="closeM('m-catalog-prod')">×</button>
     </div>
     <input type="hidden" id="cp-catalog-id">
     <input type="hidden" id="cp-price-id">
 
-    <!-- Поиск -->
-    <div style="padding:12px 22px 0;flex-shrink:0">
+    <!-- Вкладки -->
+    <div style="padding:12px 22px 0;flex-shrink:0;display:flex;gap:0;border-bottom:1px solid var(--border)">
+      <button class="cp-tab active" id="cp-tab-products"   onclick="switchCpTab('products')">📦 Товары</button>
+      <button class="cp-tab"        id="cp-tab-categories" onclick="switchCpTab('categories')">📂 Категории</button>
+      <button class="cp-tab"        id="cp-tab-folders"    onclick="switchCpTab('folders')">📁 Папки</button>
+    </div>
+
+    <!-- Поиск (только для товаров) -->
+    <div style="padding:10px 22px 0;flex-shrink:0" id="cp-search-wrap">
       <input type="text" id="cp-search" placeholder="🔍 Поиск по названию..." oninput="filterCpLeft()" style="width:100%">
     </div>
 
     <!-- Три колонки -->
-    <div style="display:grid;grid-template-columns:1fr 80px 1fr;gap:0;flex:1;overflow:hidden;padding:14px 22px;gap:12px">
+    <div style="display:grid;grid-template-columns:1fr 80px 1fr;gap:12px;flex:1;overflow:hidden;padding:14px 22px">
 
-      <!-- ЛЕВАЯ: доступные товары -->
+      <!-- ЛЕВАЯ: доступные -->
       <div style="display:flex;flex-direction:column;gap:8px;overflow:hidden">
         <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em">
-          Доступные товары <span id="cp-left-count" style="color:var(--accent)"></span>
+          Доступные <span id="cp-left-count" style="color:var(--accent)"></span>
         </div>
         <div id="cp-left-list" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding-right:4px"></div>
       </div>
 
       <!-- ЦЕНТР: кнопки -->
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
-        <button class="btn btn-primary btn-sm" onclick="cpMoveSelected()" style="writing-mode:horizontal-tb;padding:10px 8px;font-size:18px" title="Перенести выбранное">→</button>
-        <button class="btn btn-sm btn-ghost" onclick="cpMoveAll()" style="font-size:10px;text-align:center;line-height:1.3;padding:8px 6px">Все<br>→→</button>
-        <button class="btn btn-sm btn-ghost" onclick="cpRemoveSelected()" style="font-size:18px;padding:10px 8px" title="Убрать выбранное">←</button>
+        <button class="btn btn-primary btn-sm" onclick="cpMoveSelected()" style="padding:10px 8px;font-size:18px" title="Перенести выбранное">→</button>
+        <button class="btn btn-sm btn-ghost"   onclick="cpMoveAll()"      style="font-size:10px;text-align:center;line-height:1.3;padding:8px 6px">Все<br>→→</button>
+        <button class="btn btn-sm btn-ghost"   onclick="cpRemoveSelected()" style="font-size:18px;padding:10px 8px" title="Убрать">←</button>
       </div>
 
-      <!-- ПРАВАЯ: товары в каталоге -->
+      <!-- ПРАВАЯ: в каталоге -->
       <div style="display:flex;flex-direction:column;gap:8px;overflow:hidden">
         <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em">
           В каталоге <span id="cp-right-count" style="color:var(--accent)"></span>
@@ -717,7 +766,7 @@ const API = (endpoint, options = {}) => {
     </div>
 
     <div class="modal-footer" style="flex-shrink:0">
-      <span style="font-size:12px;color:var(--muted);flex:1">Кликни карточку чтобы выбрать, потом нажми →</span>
+      <span style="font-size:12px;color:var(--muted);flex:1">Выбери → перенеси → задай цену</span>
       <button class="btn btn-ghost" onclick="closeM('m-catalog-prod')">Отмена</button>
       <button class="btn btn-primary" onclick="saveCatalogPrice()">💾 Сохранить</button>
     </div>
@@ -897,7 +946,7 @@ const API = (endpoint, options = {}) => {
 
       <div class="fg">
         <label>Фото товара</label>
-        <div class="upload-zone" id="upload-zone">
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('prod-file').click()">
           <input type="file" id="prod-file" accept="image/*" onchange="onFile(this)">
           <div id="upload-ph">
             <div class="upload-ico">🖼️</div>
@@ -912,7 +961,28 @@ const API = (endpoint, options = {}) => {
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeM('m-prod')">Отмена</button>
+      <button class="btn btn-ghost" id="btn-multi-add" onclick="openMultiProd()" title="Добавить сразу несколько товаров">📋 Добавить несколько</button>
       <button class="btn btn-primary" onclick="saveProd()">💾 Сохранить товар</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: МУЛЬТИДОБАВЛЕНИЕ ТОВАРОВ ══ -->
+<div class="overlay" id="m-multi-prod">
+  <div class="modal" style="max-width:860px;width:96vw;position:relative">
+    <div class="modal-head">
+      <div class="modal-title">Добавить несколько товаров</div>
+      <button class="modal-x" onclick="closeM('m-multi-prod')">×</button>
+    </div>
+    <div class="modal-body" style="padding:16px 22px">
+      <div id="multi-prod-rows"></div>
+      <button class="btn btn-ghost btn-sm" id="btn-add-mp-row" onclick="addMpRow()" style="margin-top:4px;width:100%;justify-content:center;border-style:dashed">
+        + Ещё товар <span id="mp-row-count" style="color:var(--muted)">(0/10)</span>
+      </button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeM('m-multi-prod')">Отмена</button>
+      <button class="btn btn-primary" onclick="saveMultiProd()">💾 Сохранить все</button>
     </div>
   </div>
 </div>
@@ -946,21 +1016,51 @@ const ACTIONS = {
   catalogs: ()=>`<button class="btn btn-primary btn-sm" onclick="openCatalogModal()">+ Каталог</button>`,
 };
 
+let currentPage = 'dash';
+
 function go(page) {
+  currentPage = page;
   PAGES.forEach(p => {
     document.getElementById('page-'+p).style.display = p===page ? '' : 'none';
     const n = document.getElementById('nav-'+p);
     if(n) n.classList.toggle('active', p===page);
   });
+  
+  // Обновляем активную иконку на мобильном дашборде
+  const dash = document.getElementById('page-dash');
+  const appIcons = dash.querySelectorAll('.app-icon');
+  const pages = ['dash','cats','brands','products','catalogs'];
+  appIcons.forEach((icon, idx) => {
+    icon.classList.toggle('active', pages[idx] === page);
+  });
+  
   const topbarTitle = document.getElementById('topbar-title');
-  if (page === 'dash') {
-    topbarTitle.textContent = 'ProCatalogKz';
-    topbarTitle.style.cursor = 'pointer';
-    topbarTitle.onclick = () => window.location.href='index.html';
-  } else {
+  const backBtn = document.getElementById('topbar-back');
+  const isMobile = window.innerWidth <= 768;
+  
+  // Показываем кнопку "назад" на мобильных когда не на дашборде
+  if (isMobile && page !== 'dash') {
+    backBtn.style.display = 'block';
     topbarTitle.textContent = TITLES[page]||page;
-    topbarTitle.style.cursor = 'default';
-    topbarTitle.onclick = null;
+    topbarTitle.style.cursor = 'pointer';
+    topbarTitle.onclick = () => location.reload();
+  } else if (isMobile && page === 'dash') {
+    backBtn.style.display = 'none';
+    topbarTitle.textContent = '↻';
+    topbarTitle.style.cursor = 'pointer';
+    topbarTitle.onclick = () => location.reload();
+  } else {
+    // Десктоп - скрываем кнопку
+    backBtn.style.display = 'none';
+    if (page === 'dash') {
+      topbarTitle.textContent = 'ProCatalogKz';
+      topbarTitle.style.cursor = 'pointer';
+      topbarTitle.onclick = () => location.reload();
+    } else {
+      topbarTitle.textContent = TITLES[page]||page;
+      topbarTitle.style.cursor = 'default';
+      topbarTitle.onclick = null;
+    }
   }
   document.getElementById('topbar-actions').innerHTML = ACTIONS[page] ? ACTIONS[page]() : '';
   if(page==='cats')     renderCats();
@@ -980,14 +1080,25 @@ async function renderDash() {
     API('products?select=*,categories(name),brands(name)&order=display_order')
   ]);
 
-  // Общая статистика
+  // Обновляем статистику
   document.getElementById('st-cats').textContent   = cats.length;
   document.getElementById('st-brands').textContent = brands.length;
   document.getElementById('st-prods').textContent  = prods.length;
   document.getElementById('st-labels').textContent = prods.filter(p => p.labels && p.labels.length).length;
-  await updateCounts(); // тоже обновит счётчики
+  await updateCounts();
 
-  // Виджет категорий — показываем папки
+  // Проверка: мобильное устройство
+  const dash = document.getElementById('page-dash');
+  const isMobile = window.innerWidth <= 768;
+  
+  // Если мобильный - показываем мобильный вид через класс
+  if (isMobile) {
+    dash.classList.add('mobile-view');
+  } else {
+    dash.classList.remove('mobile-view');
+  }
+
+  // Десктопная версия - виджеты категорий
   const dashCats = document.getElementById('dash-cats');
   const folders = cats.filter(c => !c.parent_id).sort((a,b)=>a.display_order-b.display_order);
   const catChildren = cats.filter(c => !!c.parent_id);
@@ -1010,7 +1121,7 @@ async function renderDash() {
       + `<button class="btn btn-ghost btn-sm" style="margin-top:12px;width:100%;justify-content:center" onclick="go('cats')">Все категории →</button>`
     : emptyHtml('📂','Нет папок','');
 
-  // Виджет товаров (последние 5)
+  // Десктопная версия - виджеты товаров
   const dashProds = document.getElementById('dash-prods');
   dashProds.innerHTML = prods.length
     ? prods.slice(0,5).map(p => {
@@ -1074,6 +1185,7 @@ async function renderCats() {
               <span style="font-size:12px;color:var(--muted)">${cnt} тов.</span>
               <div class="td-act">
                 <button class="btn btn-xs btn-ghost" onclick="openCatModal('${cat.id}','${folder.id}')">✏️ Ред.</button>
+                <button class="btn btn-xs btn-primary" onclick="event.stopPropagation();alignCatOrders('${cat.id}','${cat.name}',${cnt})">🔢 Выровнять</button>
                 <button class="btn btn-xs btn-danger" onclick="confirmDel('cat','${cat.id}','«${cat.name}»',${cnt})">✕</button>
               </div>
             </div>
@@ -1239,7 +1351,56 @@ async function saveCat() {
     saveBtn.disabled = false; saveBtn.textContent = orig;
   }
 }
+
+async function alignCatOrders(catId, catName, cnt) {
+  if (cnt === 0) { toast('В категории нет товаров', 'i'); return; }
+  
+  if (!confirm(`Выровнять позиции товаров в категории «${catName}»?\n\nТекущие позиции будут заменены на последовательные 1, 2, 3...`)) return;
+  
+  const saveBtn = document.querySelector('#m-cat .btn-primary');
+  const btn = event.currentTarget;
+  const origText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Выравниваю...';
+  
+  try {
+    // Получаем все товары категории
+    const prods = await API(`products?select=id,display_order&category_id=eq.${catId}&order=display_order`);
     
+    if (!prods.length) {
+      toast('Нет товаров для выравнивания', 'i');
+      return;
+    }
+    
+    // Сортируем по текущей позиции
+    prods.sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+    
+    // Обновляем позиции последовательно
+    let updated = 0;
+    for (let i = 0; i < prods.length; i++) {
+      const newOrder = i + 1;
+      if (prods[i].display_order !== newOrder) {
+        await API(`products?id=eq.${prods[i].id}`, { 
+          method: 'PATCH',
+          body: { display_order: newOrder } 
+        });
+        updated++;
+      }
+    }
+    
+    toast(`✅ Выровнено ${updated} товар${updated===1?'':'а'}`, 's');
+    await renderCats();
+    await renderProds();
+    await renderDash();
+  } catch(e) {
+    toast('❌ Ошибка выравнивания', 'e');
+    console.error(e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = origText;
+  }
+}
+
 // ═══════════════════════════════════════════════════════
 // BRANDS
 // ═══════════════════════════════════════════════════════
@@ -1416,7 +1577,9 @@ async function renderProds() {
 
 async function openProdModal(id) {
   await fillProdSelects();
+  const multiBtn = document.getElementById('btn-multi-add');
   if (id) {
+    if (multiBtn) multiBtn.style.display = 'none'; // скрываем при редактировании
     const p = (await API(`products?id=eq.${id}&limit=1`))[0];
     if (p) {
       document.getElementById('m-prod-title').textContent = 'Редактировать товар';
@@ -1447,6 +1610,7 @@ async function openProdModal(id) {
       }
     }
   } else {
+    if (multiBtn) multiBtn.style.display = ''; // показываем при новом
     document.getElementById('m-prod-title').textContent = 'Новый товар';
     document.getElementById('prod-id').value = '';
     document.getElementById('prod-img-id').value = '';
@@ -1706,8 +1870,15 @@ uz.addEventListener('dragover',e=>{ e.preventDefault(); uz.classList.add('drag')
 uz.addEventListener('dragleave',()=>uz.classList.remove('drag'));
 uz.addEventListener('drop',e=>{
   e.preventDefault(); uz.classList.remove('drag');
+  e.stopPropagation(); // не открывать диалог при дропе
   const f=e.dataTransfer.files[0];
-  if(f&&f.type.startsWith('image/')){ const dt=new DataTransfer(); dt.items.add(f); const inp=document.getElementById('prod-file'); inp.files=dt.files; onFile(inp); }
+  if(f&&f.type.startsWith('image/')){
+    // Подставляем файл напрямую в input через DataTransfer
+    const dt=new DataTransfer(); dt.items.add(f);
+    const inp=document.getElementById('prod-file');
+    inp.files=dt.files;
+    onFile(inp);
+  }
 });
 
 // ═══════════════════════════════════════════════════════
@@ -1860,33 +2031,40 @@ async function renderCatalogProds(catalogId) {
   }
 }
 
+
 // ── Состояние двухпанельного селектора ──
-let _cpLeft  = []; // доступные товары (не в каталоге)
-let _cpRight = []; // товары уже в каталоге (с ценами)
+let _cpLeft  = [];
+let _cpRight = [];
 let _cpSelectedLeft  = new Set();
 let _cpSelectedRight = new Set();
+let _cpTab    = 'products';
+let _cpAllProds = [];
+let _cpAllCats  = [];
 
 async function openAddToCatalog() {
   closeM('m-catalog-view');
   document.getElementById('cp-catalog-id').value = currentCatalogId;
   document.getElementById('cp-price-id').value   = '';
-  document.getElementById('cp-search').value     = '';
+  if (document.getElementById('cp-search')) document.getElementById('cp-search').value = '';
+  _cpTab = 'products';
 
-  const [allProds, existing] = await Promise.all([
-    API('products?select=id,name,price_per_unit,qty_per_pack&order=name'),
+  const [allProds, allCats, existing] = await Promise.all([
+    API('products?select=id,name,price_per_unit,qty_per_pack,category_id&order=name'),
+    API('categories?select=id,name,parent_id,is_folder,display_order&order=display_order'),
     API(`catalog_prices?catalog_id=eq.${currentCatalogId}&select=*,products(name,price_per_unit,qty_per_pack)`)
   ]);
 
-  const existingMap = {};
-  existing.forEach(e => { existingMap[e.product_id] = e; });
+  _cpAllProds = allProds || [];
+  _cpAllCats  = allCats  || [];
 
-  // Левая — доступные (не в каталоге)
-  _cpLeft = allProds
+  const existingMap = {};
+  (existing || []).forEach(e => { existingMap[e.product_id] = e; });
+
+  _cpLeft = _cpAllProds
     .filter(p => !existingMap[p.id])
     .map(p => ({ ...p, _newPrice: p.price_per_unit }));
 
-  // Правая — уже в каталоге
-  _cpRight = existing.map(e => ({
+  _cpRight = (existing || []).map(e => ({
     id: e.product_id,
     _priceRecordId: e.id,
     name: e.products?.name || '—',
@@ -1898,58 +2076,102 @@ async function openAddToCatalog() {
   _cpSelectedLeft.clear();
   _cpSelectedRight.clear();
 
-  renderCpLeft();
-  renderCpRight();
+  switchCpTab('products');
   openM('m-catalog-prod');
 }
 
-function filterCpLeft() {
-  renderCpLeft();
+function switchCpTab(tab) {
+  _cpTab = tab;
+  _cpSelectedLeft.clear();
+  ['products','categories','folders'].forEach(t => {
+    const el = document.getElementById('cp-tab-' + t);
+    if (el) el.classList.toggle('active', t === tab);
+  });
+  const sw = document.getElementById('cp-search-wrap');
+  if (sw) sw.style.display = tab === 'products' ? '' : 'none';
+  if (tab === 'products')   renderCpLeft();
+  if (tab === 'categories') renderCpLeftCategories();
+  if (tab === 'folders')    renderCpLeftFolders();
 }
 
+function filterCpLeft() { if (_cpTab === 'products') renderCpLeft(); }
+
 function renderCpLeft() {
-  const q = (document.getElementById('cp-search')?.value || '').toLowerCase();
+  const q    = (document.getElementById('cp-search')?.value || '').toLowerCase();
   const list = document.getElementById('cp-left-list');
-  const filtered = _cpLeft.filter(p => p.name.toLowerCase().includes(q));
+  const rightIds = new Set(_cpRight.map(p => p.id));
+  const filtered = _cpLeft.filter(p => !rightIds.has(p.id) && p.name.toLowerCase().includes(q));
   document.getElementById('cp-left-count').textContent = `(${filtered.length})`;
-  if (!filtered.length) {
-    list.innerHTML = `<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Нет доступных товаров</div>`;
-    return;
-  }
-  list.innerHTML = filtered.map(p => `
-    <div class="cp-card ${_cpSelectedLeft.has(p.id) ? 'selected' : ''}"
-         onclick="cpToggleLeft('${p.id}')">
-      <div class="cp-card-name">${p.name}</div>
-      <div class="cp-card-base">База: ${p.price_per_unit.toLocaleString()} ₸ · уп. ${p.qty_per_pack} шт</div>
-    </div>`).join('');
+  list.innerHTML = filtered.length
+    ? filtered.map(p => `
+        <div class="cp-card ${_cpSelectedLeft.has(p.id)?'selected':''}" onclick="cpToggleLeft('${p.id}')">
+          <div class="cp-card-name">${p.name}</div>
+          <div class="cp-card-base">База: ${p.price_per_unit.toLocaleString()} ₸ · уп. ${p.qty_per_pack} шт</div>
+        </div>`).join('')
+    : `<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Нет доступных товаров</div>`;
+}
+
+function renderCpLeftCategories() {
+  const list = document.getElementById('cp-left-list');
+  const rightIds = new Set(_cpRight.map(p => p.id));
+  const cats = _cpAllCats.filter(c => !c.is_folder);
+  document.getElementById('cp-left-count').textContent = `(${cats.length})`;
+  list.innerHTML = cats.length
+    ? cats.map(c => {
+        const prodsInCat = _cpAllProds.filter(p => p.category_id === c.id);
+        const alreadyIn  = prodsInCat.filter(p => rightIds.has(p.id)).length;
+        const newCount   = prodsInCat.length - alreadyIn;
+        return `<div class="cp-card ${_cpSelectedLeft.has(c.id)?'selected':''}" onclick="cpToggleLeft('${c.id}')">
+          <div class="cp-card-name">📂 ${c.name}</div>
+          <div class="cp-card-base">${prodsInCat.length} тов. · новых: ${newCount} · уже в каталоге: ${alreadyIn}</div>
+        </div>`;
+      }).join('')
+    : `<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Нет категорий</div>`;
+}
+
+function renderCpLeftFolders() {
+  const list = document.getElementById('cp-left-list');
+  const rightIds = new Set(_cpRight.map(p => p.id));
+  const folders = _cpAllCats.filter(c => c.is_folder);
+  document.getElementById('cp-left-count').textContent = `(${folders.length})`;
+  list.innerHTML = folders.length
+    ? folders.map(f => {
+        const catIds     = _cpAllCats.filter(c => c.parent_id === f.id).map(c => c.id);
+        const prodsInF   = _cpAllProds.filter(p => catIds.includes(p.category_id));
+        const alreadyIn  = prodsInF.filter(p => rightIds.has(p.id)).length;
+        const newCount   = prodsInF.length - alreadyIn;
+        return `<div class="cp-card ${_cpSelectedLeft.has(f.id)?'selected':''}" onclick="cpToggleLeft('${f.id}')">
+          <div class="cp-card-name">📁 ${f.name}</div>
+          <div class="cp-card-base">${prodsInF.length} тов. · новых: ${newCount} · уже в каталоге: ${alreadyIn}</div>
+        </div>`;
+      }).join('')
+    : `<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Нет папок</div>`;
 }
 
 function renderCpRight() {
   const list = document.getElementById('cp-right-list');
   document.getElementById('cp-right-count').textContent = `(${_cpRight.length})`;
-  if (!_cpRight.length) {
-    list.innerHTML = `<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Пусто — перенесите товары слева</div>`;
-    return;
-  }
-  list.innerHTML = _cpRight.map(p => `
-    <div class="cp-card ${_cpSelectedRight.has(p.id) ? 'selected' : ''}"
-         onclick="cpToggleRight('${p.id}')">
-      <div class="cp-card-name">${p.name}</div>
-      <div class="cp-card-base">База: ${p.price_per_unit.toLocaleString()} ₸ · уп. ${p.qty_per_pack} шт</div>
-      <div class="cp-card-price-wrap">
-        <label>Цена ₸</label>
-        <input type="number" value="${p._newPrice}"
-               onclick="event.stopPropagation()"
-               oninput="cpUpdatePrice('${p.id}', this.value)"
-               min="0">
-      </div>
-    </div>`).join('');
+  list.innerHTML = _cpRight.length
+    ? _cpRight.map(p => `
+        <div class="cp-card ${_cpSelectedRight.has(p.id)?'selected':''}" onclick="cpToggleRight('${p.id}')">
+          <div class="cp-card-name">${p.name}</div>
+          <div class="cp-card-base">База: ${p.price_per_unit.toLocaleString()} ₸</div>
+          <div class="cp-card-price-wrap">
+            <label>Цена ₸</label>
+            <input type="number" value="${p._newPrice}"
+                   onclick="event.stopPropagation()"
+                   oninput="cpUpdatePrice('${p.id}', this.value)" min="0">
+          </div>
+        </div>`).join('')
+    : `<div style="text-align:center;padding:24px;color:var(--muted);font-size:13px">Пусто — перенесите элементы слева</div>`;
 }
 
 function cpToggleLeft(id) {
   if (_cpSelectedLeft.has(id)) _cpSelectedLeft.delete(id);
   else _cpSelectedLeft.add(id);
-  renderCpLeft();
+  if (_cpTab === 'products')   renderCpLeft();
+  if (_cpTab === 'categories') renderCpLeftCategories();
+  if (_cpTab === 'folders')    renderCpLeftFolders();
 }
 
 function cpToggleRight(id) {
@@ -1963,27 +2185,74 @@ function cpUpdatePrice(id, val) {
   if (item) item._newPrice = parseFloat(val) || 0;
 }
 
-function cpMoveSelected() {
-  if (!_cpSelectedLeft.size) { toast('Выберите товары слева', 'i'); return; }
+// Собираем список товаров которые нужно добавить по выбранным id (папки/категории/товары)
+function cpExpandSelection() {
+  const rightIds = new Set(_cpRight.map(p => p.id));
+  const toAdd = [];
   _cpSelectedLeft.forEach(id => {
-    const idx = _cpLeft.findIndex(p => p.id === id);
-    if (idx === -1) return;
-    const item = _cpLeft.splice(idx, 1)[0];
-    _cpRight.push({ ...item, _newPrice: item.price_per_unit, _priceRecordId: null });
+    if (_cpTab === 'products') {
+      const p = _cpLeft.find(x => x.id === id);
+      if (p && !rightIds.has(p.id)) toAdd.push({ ...p, _newPrice: p.price_per_unit, _priceRecordId: null });
+    } else if (_cpTab === 'categories') {
+      // Все товары этой категории которых ещё нет справа
+      _cpAllProds.filter(p => p.category_id === id && !rightIds.has(p.id)).forEach(p => {
+        toAdd.push({ ...p, _newPrice: p.price_per_unit, _priceRecordId: null });
+        rightIds.add(p.id);
+      });
+    } else if (_cpTab === 'folders') {
+      // Все категории папки → все товары этих категорий
+      const catIds = _cpAllCats.filter(c => c.parent_id === id).map(c => c.id);
+      _cpAllProds.filter(p => catIds.includes(p.category_id) && !rightIds.has(p.id)).forEach(p => {
+        toAdd.push({ ...p, _newPrice: p.price_per_unit, _priceRecordId: null });
+        rightIds.add(p.id);
+      });
+    }
   });
+  return toAdd;
+}
+
+function cpMoveSelected() {
+  if (!_cpSelectedLeft.size) { toast('Выберите элементы слева', 'i'); return; }
+  const toAdd = cpExpandSelection();
+  if (!toAdd.length) { toast('Все выбранные товары уже в каталоге', 'i'); _cpSelectedLeft.clear(); return; }
+  // Убираем из _cpLeft только товары (для вкладки товаров)
+  if (_cpTab === 'products') {
+    _cpSelectedLeft.forEach(id => {
+      const idx = _cpLeft.findIndex(p => p.id === id);
+      if (idx !== -1) _cpLeft.splice(idx, 1);
+    });
+  }
+  _cpRight.push(...toAdd);
   _cpSelectedLeft.clear();
-  renderCpLeft();
+  if (_cpTab === 'products')   renderCpLeft();
+  if (_cpTab === 'categories') renderCpLeftCategories();
+  if (_cpTab === 'folders')    renderCpLeftFolders();
   renderCpRight();
+  toast(`Добавлено ${toAdd.length} товар${toAdd.length===1?'':toAdd.length<5?'а':'ов'}`, 's');
 }
 
 function cpMoveAll() {
-  _cpLeft.forEach(item => {
-    _cpRight.push({ ...item, _newPrice: item.price_per_unit, _priceRecordId: null });
-  });
-  _cpLeft = [];
+  const rightIds = new Set(_cpRight.map(p => p.id));
+  let toAdd = [];
+  if (_cpTab === 'products') {
+    toAdd = _cpLeft.filter(p => !rightIds.has(p.id)).map(p => ({ ...p, _newPrice: p.price_per_unit, _priceRecordId: null }));
+    _cpLeft = [];
+  } else if (_cpTab === 'categories') {
+    _cpAllProds.filter(p => !rightIds.has(p.id)).forEach(p => {
+      toAdd.push({ ...p, _newPrice: p.price_per_unit, _priceRecordId: null });
+    });
+  } else if (_cpTab === 'folders') {
+    _cpAllProds.filter(p => !rightIds.has(p.id)).forEach(p => {
+      toAdd.push({ ...p, _newPrice: p.price_per_unit, _priceRecordId: null });
+    });
+  }
+  _cpRight.push(...toAdd);
   _cpSelectedLeft.clear();
-  renderCpLeft();
+  if (_cpTab === 'products')   renderCpLeft();
+  if (_cpTab === 'categories') renderCpLeftCategories();
+  if (_cpTab === 'folders')    renderCpLeftFolders();
   renderCpRight();
+  if (toAdd.length) toast(`Добавлено ${toAdd.length} товаров`, 's');
 }
 
 function cpRemoveSelected() {
@@ -1992,11 +2261,10 @@ function cpRemoveSelected() {
     const idx = _cpRight.findIndex(p => p.id === id);
     if (idx === -1) return;
     const item = _cpRight.splice(idx, 1)[0];
-    // Возвращаем в левую (только если нет записи в БД — если есть, удалим при сохранении)
     _cpLeft.push({ id: item.id, name: item.name, price_per_unit: item.price_per_unit, qty_per_pack: item.qty_per_pack, _newPrice: item.price_per_unit, _removeFromDb: item._priceRecordId });
   });
   _cpSelectedRight.clear();
-  renderCpLeft();
+  if (_cpTab === 'products') renderCpLeft();
   renderCpRight();
 }
 
@@ -2085,11 +2353,382 @@ function copyCatalogLinkById(slug) {
   navigator.clipboard.writeText(url).then(() => toast('Ссылка скопирована','s'));
 }
 
-// INIT
-(async function init() {
-  await renderDash();
-  // сразу заполним фильтры для товаров, чтобы при первом открытии страницы товаров селекты были готовы
+// ═══════════════════════════════════════════════════════
+// МОБИЛЬНАЯ НАВИГАЦИЯ
+// ═══════════════════════════════════════════════════════
+const IS_MOB = () => window.innerWidth <= 768;
+
+function mobGo(page) {
+  if (!IS_MOB()) { go(page); return; }
+  // Скрываем меню
+  document.getElementById('mob-menu').classList.remove('visible');
+  document.getElementById('mob-menu').classList.add('hidden');
+  // Показываем кнопку назад
+  document.getElementById('mob-back-btn').classList.add('visible');
+  // Активируем страницу
+  const pages = ['dash','cats','brands','products','catalogs','settings'];
+  pages.forEach(p => {
+    const el = document.getElementById('page-' + p);
+    if (el) el.classList.toggle('mob-active', p === page);
+  });
+  // Обновляем заголовок
+  const titles = { dash:'Дашборд', cats:'Категории', brands:'Бренды / ТМ', products:'Товары', catalogs:'Каталоги', settings:'Настройки' };
+  document.getElementById('topbar-title').textContent = titles[page] || page;
+  // Экшены в топбаре
+  const ACTIONS = {
+    cats:     () => `<button class="btn btn-primary btn-sm" onclick="openCatModal()">+ Категория</button>`,
+    brands:   () => `<button class="btn btn-primary btn-sm" onclick="openBrandModal()">+ Бренд</button>`,
+    products: () => `<button class="btn btn-primary btn-sm" onclick="openProdModal()">+ Товар</button>`,
+    catalogs: () => `<button class="btn btn-primary btn-sm" onclick="openCatalogModal()">+ Каталог</button>`,
+  };
+  document.getElementById('topbar-actions').innerHTML = ACTIONS[page] ? ACTIONS[page]() : '';
+  // Запускаем рендер
+  if (page === 'dash')         renderDash();
+  if (page === 'cats')         renderCats();
+  if (page === 'brands')       renderBrands();
+  if (page === 'products')     { fillProdSelects(); renderProds(); }
+  if (page === 'catalogs')     renderCatalogs();
+}
+
+function mobGoHome() {
+  if (!IS_MOB()) return;
+  // Скрываем все страницы
+  ['dash','cats','brands','products','catalogs','settings'].forEach(p => {
+    const el = document.getElementById('page-' + p);
+    if (el) el.classList.remove('mob-active');
+  });
+  // Показываем меню
+  document.getElementById('mob-menu').classList.remove('hidden');
+  document.getElementById('mob-menu').classList.add('visible');
+  // Скрываем кнопку назад
+  document.getElementById('mob-back-btn').classList.remove('visible');
+  // Сбрасываем заголовок
+  document.getElementById('topbar-title').textContent = 'Каталог';
+  document.getElementById('topbar-actions').innerHTML = '';
+  // Обновляем счётчики на тайлах
+  mobUpdateBadges();
+}
+
+async function mobUpdateBadges() {
+  try {
+    const [cats, brands, prods, catalogs] = await Promise.all([
+      API('categories?is_folder=eq.false&select=id'),
+      API('brands?select=id'),
+      API('products?select=id'),
+      API('catalogs?select=id').catch(() => [])
+    ]);
+    const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+    set('mob-cnt-cats',    cats.length);
+    set('mob-cnt-brands',  brands.length);
+    set('mob-cnt-prods',   prods.length);
+    set('mob-cnt-catalogs', (catalogs||[]).length);
+    // Также обновляем cnt- для совместимости с updateCounts()
+    set('cnt-cats',    cats.length);
+    set('cnt-brands',  brands.length);
+    set('cnt-prods',   prods.length);
+    set('cnt-catalogs', (catalogs||[]).length);
+  } catch(e) { console.error(e); }
+}
+
+// На десктопе — скрываем мобильное меню
+function applyMobState() {
+  const menu   = document.getElementById('mob-menu');
+  const backBtn = document.getElementById('mob-back-btn');
+  if (!IS_MOB()) {
+    if (menu) menu.style.display = 'none';
+    if (backBtn) backBtn.style.display = 'none';
+  } else {
+    if (menu) menu.style.display = '';
+    if (backBtn) backBtn.style.display = '';
+  }
+}
+window.addEventListener('resize', applyMobState);
+
+// ═══════════════════════════════════════════════════════
+// МУЛЬТИДОБАВЛЕНИЕ ТОВАРОВ
+// ═══════════════════════════════════════════════════════
+let _mpRows = []; // [{id, name, catId, brandId, price, qty, order}]
+
+async function openMultiProd() {
+  closeM('m-prod');
+  _mpRows = [];
+  // Заполняем селекты если ещё не заполнены
   await fillProdSelects();
+  // Добавляем первую строку
+  addMpRow();
+  openM('m-multi-prod');
+}
+
+function previewMpPhoto(input, prevId) {
+  const file = input.files[0];
+  if (!file) return;
+  const nameEl = document.getElementById(input.id.replace('mpf-', 'mpfname-'));
+  if (nameEl) nameEl.textContent = file.name;
+  // Сохраняем имя файла в _mpRows чтобы не терялось при перерисовке
+  const rowId = input.id.replace('mpf-', '');
+  const row = _mpRows.find(r => r.rowId === rowId);
+  if (row) row._savedFileName = file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const prev = document.getElementById(prevId);
+    if (prev) { prev.src = e.target.result; prev.style.display = ''; }
+    // Сохраняем base64 превью
+    if (row) row._savedPreview = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function addMpRow() {
+  if (_mpRows.length >= 10) { toast('Максимум 10 товаров за раз', 'i'); return; }
+  const rowId = 'mp-' + Date.now() + '-' + Math.random().toString(36).slice(2,6);
+  _mpRows.push({ rowId });
+  renderMpRows();
+}
+
+function removeMpRow(rowId) {
+  _mpRows = _mpRows.filter(r => r.rowId !== rowId);
+  renderMpRows();
+}
+
+async function renderMpRows() {
+  // ── Сначала сохраняем текущие значения из полей ──
+  _mpRows.forEach(row => {
+    const n = document.getElementById('mpn-' + row.rowId);
+    const c = document.getElementById('mpc-' + row.rowId);
+    const b = document.getElementById('mpb-' + row.rowId);
+    const p = document.getElementById('mpp-' + row.rowId);
+    const q = document.getElementById('mpq-' + row.rowId);
+    const o = document.getElementById('mpo-' + row.rowId);
+    if (n) row._savedName   = n.value;
+    if (c) row._savedCat    = c.value;
+    if (b) row._savedBrand  = b.value;
+    if (p) row._savedPrice  = p.value;
+    if (q) row._savedQty    = q.value;
+    if (o) row._savedOrder  = o.value;
+  });
+
+  const wrap = document.getElementById('multi-prod-rows');
+  const cnt  = document.getElementById('mp-row-count');
+  if (cnt) cnt.textContent = `(${_mpRows.length}/10)`;
+
+  const allCats   = await API('categories?is_folder=eq.false&select=id,name,display_order,parent_id&order=display_order');
+  const allBrands = await API('brands?select=id,name&order=name');
+  const folders   = await API('categories?is_folder=eq.true&select=id,name&order=display_order');
+
+  let catOpts = '<option value="">— категория —</option>';
+  folders.forEach(f => {
+    const kids = allCats.filter(c => c.parent_id === f.id);
+    if (kids.length) {
+      catOpts += `<optgroup label="📁 ${f.name}">`;
+      kids.forEach(c => { catOpts += `<option value="${c.id}">${c.name}</option>`; });
+      catOpts += `</optgroup>`;
+    }
+  });
+  const orphans = allCats.filter(c => !folders.map(f=>f.id).includes(c.parent_id));
+  orphans.forEach(c => { catOpts += `<option value="${c.id}">${c.name}</option>`; });
+
+  const brandOpts = '<option value="">— бренд —</option>' +
+    allBrands.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+
+  wrap.innerHTML = _mpRows.map((row, i) => `
+    <div class="mprod-row" id="row-${row.rowId}">
+      <span class="mprod-row-num">${i+1}</span>
+      <button class="mprod-row-del" onclick="removeMpRow('${row.rowId}')">✕</button>
+      <div class="frow3" style="margin-bottom:10px">
+        <div class="fg" style="margin-bottom:0">
+          <label>Название *</label>
+          <input type="text" id="mpn-${row.rowId}" placeholder="Название товара" value="${row._savedName||''}">
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label>Категория</label>
+          <select id="mpc-${row.rowId}" onchange="calcMpAutoOrder('${row.rowId}')">${catOpts}</select>
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label>Бренд</label>
+          <select id="mpb-${row.rowId}">${brandOpts}</select>
+        </div>
+      </div>
+      <div class="frow3" style="margin-bottom:10px">
+        <div class="fg" style="margin-bottom:0">
+          <label>Цена за шт (₸)</label>
+          <div class="pfx">
+            <span class="pfx-lbl">₸</span>
+            <input type="number" id="mpp-${row.rowId}" placeholder="0" min="0" value="${row._savedPrice||''}">
+          </div>
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label>Кол-во в упаковке</label>
+          <input type="number" id="mpq-${row.rowId}" placeholder="1" min="1" value="${row._savedQty||1}">
+        </div>
+        <div class="fg" style="margin-bottom:0">
+          <label>Позиция</label>
+          <input type="number" id="mpo-${row.rowId}" placeholder="авто" min="1" value="${row._savedOrder||''}" style="background:${row._savedOrder?'var(--bg2)':'var(--bg)'}" readonly>
+          <div class="hint" id="mpo-hint-${row.rowId}" style="margin-top:4px;font-size:10px;display:${row._savedOrder?'none':''}">Выберите категорию для авто-расчёта</div>
+        </div>
+      </div>
+      <div class="fg" style="margin-bottom:0">
+        <label>Фото товара</label>
+        <div style="display:flex;align-items:center;gap:10px">
+          <label style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg4);cursor:pointer;font-size:12px;color:var(--text);font-weight:500" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">
+            🖼️ Выбрать файл
+            <input type="file" accept="image/*" id="mpf-${row.rowId}" style="display:none" onchange="previewMpPhoto(this,'mpprev-${row.rowId}')">
+          </label>
+          <span id="mpfname-${row.rowId}" style="font-size:11px;color:var(--muted)">${row._savedFileName||'не выбрано'}</span>
+          <img id="mpprev-${row.rowId}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;display:${row._savedPreview?'':'none'};border:1px solid var(--border2)" src="${row._savedPreview||''}">
+        </div>
+      </div>
+    </div>`).join('');
+
+  // ── Восстанавливаем selects (value нужно ставить после вставки в DOM) ──
+  _mpRows.forEach(row => {
+    const c = document.getElementById('mpc-' + row.rowId);
+    const b = document.getElementById('mpb-' + row.rowId);
+    if (c && row._savedCat) {
+      c.value = row._savedCat;
+      // Если позиция не задана — считаем для восстановленной категории
+      if (!row._savedOrder) calcMpAutoOrder(row.rowId);
+    }
+    if (b && row._savedBrand) b.value = row._savedBrand;
+  });
+
+  const addBtn = document.getElementById('btn-add-mp-row');
+  if (addBtn) addBtn.style.display = _mpRows.length >= 10 ? 'none' : '';
+}
+
+async function calcMpAutoOrder(rowId) {
+  const catSelect = document.getElementById('mpc-' + rowId);
+  const catId = catSelect?.value;
+  const orderInput = document.getElementById('mpo-' + rowId);
+  const hint = document.getElementById('mpo-hint-' + rowId);
+
+  if (!catId) return;
+
+  // Показываем индикатор загрузки
+  orderInput.style.opacity = '0.5';
+  orderInput.disabled = true;
+
+  try {
+    const allProds = await API('products?select=category_id,display_order');
+    const existingInCat = allProds.filter(p => p.category_id === catId);
+    const maxOrder = existingInCat.length > 0 ? Math.max(...existingInCat.map(p => p.display_order || 0)) : 0;
+    const newOrder = maxOrder + 1;
+
+    orderInput.value = newOrder;
+    orderInput.style.background = 'var(--bg2)';
+    if (hint) hint.style.display = 'none';
+  } catch(e) {
+    console.error('Ошибка расчёта позиции:', e);
+  } finally {
+    orderInput.style.opacity = '1';
+    orderInput.disabled = false;
+  }
+}
+
+async function saveMultiProd() {
+  const rows = document.querySelectorAll('.mprod-row');
+  if (!rows.length) { toast('Добавьте хотя бы один товар', 'e'); return; }
+
+  // Показываем индикатор загрузки
+  const modal = document.querySelector('#m-multi-prod .modal');
+  const progressWrap = document.createElement('div');
+  progressWrap.id = 'mp-progress-wrap';
+  progressWrap.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:4px;background:var(--border);overflow:hidden;z-index:10';
+  modal.appendChild(progressWrap);
+
+  const progress = document.createElement('div');
+  progress.id = 'mp-progress-bar';
+  progress.style.cssText = 'height:100%;width:0%;background:var(--accent);transition:width .3s';
+  progressWrap.appendChild(progress);
+
+  // Блокируем кнопку сохранения
+  const saveBtn = document.querySelector('#m-multi-prod .btn-primary');
+  if (saveBtn) saveBtn.disabled = true;
+
+  // Получаем все товары из базы один раз
+  const allProds = await API('products?select=category_id,display_order');
+
+  // Храним максимальные позиции для каждой категории в этой сессии
+  const sessionMaxOrders = {};
+
+  let saved = 0, errors = 0;
+  const total = _mpRows.length;
+
+  for (let idx = 0; idx < _mpRows.length; idx++) {
+    const row = _mpRows[idx];
+    const name  = document.getElementById('mpn-' + row.rowId)?.value.trim();
+    const catId = document.getElementById('mpc-' + row.rowId)?.value || null;
+    const brId  = document.getElementById('mpb-' + row.rowId)?.value || null;
+    const price = parseFloat(document.getElementById('mpp-' + row.rowId)?.value) || 0;
+    const qty   = parseInt(document.getElementById('mpq-' + row.rowId)?.value)   || 1;
+
+    if (!name || !catId) { errors++; continue; }
+
+    // ВСЕГДА пересчитываем позицию на основе сессии
+    const existingInCat = allProds.filter(p => p.category_id === catId);
+    
+    // Добавляем товары из текущей сессии в эту же категорию
+    if (sessionMaxOrders[catId] !== undefined) {
+      existingInCat.push({ category_id: catId, display_order: sessionMaxOrders[catId] });
+    }
+    
+    const maxOrder = existingInCat.length > 0 ? Math.max(...existingInCat.map(p => p.display_order || 0)) : 0;
+    const order = maxOrder + 1;
+    
+    // Сохраняем в сессию чтобы следующий товар в этой категории получил order+1
+    sessionMaxOrders[catId] = order;
+
+    // Обновляем прогресс
+    const progressPercent = ((idx + 1) / total) * 100;
+    progress.style.width = progressPercent + '%';
+
+    try {
+      // Загружаем фото в Cloudinary если выбрано
+      let imagePublicId = null;
+      const fileInput = document.getElementById('mpf-' + row.rowId);
+      if (fileInput?.files[0]) {
+        try {
+          const fd = new FormData();
+          fd.append('file', fileInput.files[0]);
+          fd.append('upload_preset', CLOUDINARY_PRESET);
+          const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_NAME}/image/upload`, { method: 'POST', body: fd });
+          const data = await res.json();
+          if (data.public_id) imagePublicId = data.public_id;
+        } catch(uploadErr) { console.error('Ошибка загрузки фото:', uploadErr); }
+      }
+      await API('products', {
+        method: 'POST',
+        body: { name, category_id: catId, brand_id: brId, price_per_unit: price, qty_per_pack: qty, display_order: order, labels: [], image_public_id: imagePublicId }
+      });
+      saved++;
+    } catch(e) { errors++; console.error(e); }
+  }
+
+  // Заполняем прогресс до конца
+  progress.style.width = '100%';
+
+  // Ждём 300мс чтобы пользователь увидел 100%
+  await new Promise(r => setTimeout(r, 300));
+
+  // Скрываем индикатор
+  if (progressWrap) progressWrap.remove();
+  if (saveBtn) saveBtn.disabled = false;
+
+  if (saved)  toast(`✅ Добавлено ${saved} товар${saved===1?'':saved<5?'а':'ов'}`, 's');
+  if (errors) toast(`❌ Ошибок: ${errors} (проверьте названия и категории)`, 'e');
+
+  if (saved) {
+    closeM('m-multi-prod');
+    _mpRows = [];
+    await renderProds();
+    await renderDash();
+    await updateCounts();
+  }
+}
+(async function init() {
+  applyMobState();
+  await renderDash();
+  await fillProdSelects();
+  if (IS_MOB()) mobUpdateBadges();
 })();
 </script>
 </body>
